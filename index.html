@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mante & Moni · 13 Junio 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde: #4a7c59;
+      --verde-claro: #e8f0eb;
+      --verde-medio: #a8c5b0;
+      --crema: #f7f4ef;
+      --texto: #2a3d2f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: 'Jost', sans-serif;
+      background: var(--crema);
+      color: var(--texto);
+    }
+    .wedding-app { width: 100%; }
+    .hero {
+      width: 100%;
+      height: 50vw;
+      max-height: 520px;
+      min-height: 200px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center 40%;
+      background-color: #2a3d2f;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.0) 30%, rgba(20,40,25,0.78) 100%);
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      width: 100%;
+    }
+    .hero-label { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem; }
+    .hero-names { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; color: #fff; line-height: 1.05; }
+    .hero-amp { font-style: italic; color: var(--verde-medio); font-size: 28px; }
+    .hero-date { margin-top: 0.5rem; font-size: 13px; color: rgba(255,255,255,0.75); letter-spacing: 2px; }
+
+    .content { max-width: 600px; margin: 0 auto; }
+
+    .countdown-bar {
+      background: #fff;
+      margin: 1.25rem 1rem 0;
+      border-radius: 16px;
+      padding: 1.25rem;
+      border: 0.5px solid #d4e4d8;
+      text-align: center;
+    }
+    .countdown-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 0.75rem; }
+    .countdown-nums { display: flex; justify-content: center; gap: 8px; align-items: flex-start; }
+    .cnt-block { text-align: center; }
+    .cnt-num { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 500; color: var(--verde); line-height: 1; }
+    .cnt-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #7a9a82; margin-top: 2px; }
+    .cnt-sep { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--verde-medio); padding-top: 2px; }
+
+    .section {
+      margin: 1rem 1rem 0;
+      background: #fff;
+      border-radius: 16px;
+      border: 0.5px solid #d4e4d8;
+      overflow: hidden;
+    }
+    .section-header { padding: 1rem 1.25rem 0.5rem; display: flex; align-items: center; gap: 8px; }
+    .section-icon {
+      width: 28px; height: 28px;
+      background: var(--verde-claro);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); font-weight: 500; }
+
+    .route-stops { padding: 0.5rem 1.25rem 1.25rem; }
+    .stop { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; position: relative; }
+    .stop:not(:last-child)::after {
+      content: ''; position: absolute; left: 11px; top: 24px; bottom: -4px;
+      width: 1px; background: var(--verde-medio);
+    }
+    .stop-dot {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .stop-dot.origin, .stop-dot.dest { background: var(--verde); }
+    .stop-dot.mid { background: var(--verde-claro); border: 1.5px solid var(--verde-medio); }
+    .stop-name { font-size: 14px; font-weight: 500; color: var(--texto); }
+    .stop-time { font-size: 12px; color: #7a9a82; margin-top: 1px; }
+    .stop-note { font-size: 11px; color: var(--verde); background: var(--verde-claro); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 4px; }
+
+    .schedule { padding: 0.5rem 1.25rem 1.25rem; }
+    .schedule-item { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 0.5px solid #eef4f0; }
+    .schedule-item:last-child { border-bottom: none; }
+    .schedule-time { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--verde); min-width: 54px; flex-shrink: 0; }
+    .schedule-body { flex: 1; }
+    .schedule-event { font-size: 14px; color: var(--texto); padding-top: 1px; }
+    .schedule-sub { font-size: 11px; color: #7a9a82; margin-top: 1px; }
+    .schedule-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--verde);
+      text-decoration: none; margin-top: 3px;
+    }
+    .schedule-link:hover { text-decoration: underline; }
+    .schedule-link svg { flex-shrink: 0; }
+
+    .footer { padding: 2rem 1.5rem; text-align: center; font-size: 11px; color: #a0b5a5; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+<div class="wedding-app">
+
+  <div class="hero">
+    <img src="foto.jpeg" alt="Mante y Moni">
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <p class="hero-label">nos casamos</p>
+      <div class="hero-names">Mante <span class="hero-amp">&amp;</span> Moni</div>
+      <p class="hero-date">13 · VI · 2026</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="countdown-bar">
+      <p class="countdown-title">faltan</p>
+      <div class="countdown-nums">
+        <div class="cnt-block"><div class="cnt-num" id="cd-days">—</div><div class="cnt-label">días</div></div>
+        <div class="cnt-sep">:</div>
+        <div class="cnt-block"><div class="cnt-num" id="cd-hours">—</div><div class="cnt-label">horas</div></div>
+        <div class="cnt-sep">:</div>
+        <div class="cnt-block"><div class="cnt-num" id="cd-mins">—</div><div class="cnt-label">min</div></div>
+        <div class="cnt-sep">:</div>
+        <div class="cnt-block"><div class="cnt-num" id="cd-secs">—</div><div class="cnt-label">seg</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <span class="section-title">Recorrido del autobús</span>
+      </div>
+      <div class="route-stops">
+        <div class="stop">
+          <div class="stop-dot origin">
+            <svg viewBox="0 0 10 10" fill="white" width="10" height="10"><circle cx="5" cy="5" r="3"/></svg>
+          </div>
+          <div>
+            <div class="stop-name">Salida</div>
+            <div class="stop-time">19:15 h · Parroquia Santa María de Caná</div>
+          </div>
+        </div>
+        <div class="stop">
+          <div class="stop-dot dest">
+            <svg viewBox="0 0 10 10" fill="white" width="10" height="10"><circle cx="5" cy="5" r="3"/></svg>
+          </div>
+          <div>
+            <div class="stop-name">Finca El Pendolero · Torrelodones</div>
+            <div class="stop-time">20:00 h · Celebración</div>
+            <span class="stop-note">Vuelta: 02:30 h y 05:00 h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <span class="section-title">El día</span>
+      </div>
+      <div class="schedule">
+
+        <div class="schedule-item">
+          <div class="schedule-time">17:30</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Recepción del novio</div>
+            <a class="schedule-link" href="https://maps.app.goo.gl/Znc81kMrQA5H5qyHA" target="_blank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Parroquia Santa María de Caná
+            </a>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">18:00</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Ceremonia</div>
+            <a class="schedule-link" href="https://maps.app.goo.gl/Znc81kMrQA5H5qyHA" target="_blank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Parroquia Santa María de Caná
+            </a>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">19:15</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Salida de los autobuses</div>
+            <a class="schedule-link" href="https://maps.app.goo.gl/Znc81kMrQA5H5qyHA" target="_blank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Parroquia Santa María de Caná
+            </a>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">20:00</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Inicio del cóctel</div>
+            <a class="schedule-link" href="https://maps.app.goo.gl/oskpL5GstJXyeB919" target="_blank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Finca El Pendolero
+            </a>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">22:00</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Inicio de la cena</div>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">23:30</div>
+          <div class="schedule-body">
+            <div class="schedule-event">¡Empieza la fiesta!</div>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">02:30</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Salida primer autobús</div>
+          </div>
+        </div>
+
+        <div class="schedule-item">
+          <div class="schedule-time">05:00</div>
+          <div class="schedule-body">
+            <div class="schedule-event">Vuelta a casa</div>
+            <div class="schedule-sub">Autobús de regreso</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">✦ Mante &amp; Moni · 13 junio 2026 ✦</div>
+  </div>
+
+</div>
+<script>
+  function updateCountdown() {
+    const wedding = new Date('2026-06-13T18:00:00');
+    const now = new Date();
+    const diff = wedding - now;
+    if (diff <= 0) {
+      ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '0');
+      return;
+    }
+    document.getElementById('cd-days').textContent = Math.floor(diff / 86400000);
+    document.getElementById('cd-hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+    document.getElementById('cd-mins').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    document.getElementById('cd-secs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
