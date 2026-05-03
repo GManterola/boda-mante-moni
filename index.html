@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mante & Moni · 13 Junio 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde: #4a7c59; --verde-claro: #e8f0eb; --verde-medio: #a8c5b0;
+      --verde-oscuro: #2a3d2f; --crema: #f7f4ef; --texto: #2a3d2f;
+      --blanco: #ffffff; --nav-h: 64px;
+      --oro: #c0a060; --oro-claro: #fdf0d0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; font-family: 'DM Sans', sans-serif; background: var(--crema); color: var(--texto); overflow: hidden; }
+    .app { width: 100%; height: 100vh; display: flex; flex-direction: column; }
+    .screens { flex: 1; overflow: hidden; position: relative; }
+    .screen { position: absolute; inset: 0; overflow-y: auto; opacity: 0; pointer-events: none; transform: translateY(12px); transition: opacity 0.3s ease, transform 0.3s ease; padding-bottom: calc(var(--nav-h) + 16px); }
+    .screen.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+    /* NAV */
+    nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--blanco); border-top: 0.5px solid #d4e4d8; display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: #a0b5a5; transition: color 0.2s; border: none; background: none; padding: 0; }
+    .nav-btn.active { color: var(--verde); }
+    .nav-btn svg { width: 22px; height: 22px; }
+    .nav-label { font-size: 10px; letter-spacing: 0.5px; font-weight: 500; }
+    .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--verde); opacity: 0; transition: opacity 0.2s; margin-top: -2px; }
+    .nav-btn.active .nav-dot { opacity: 1; }
+
+    /* POPUP */
+    .bus-popup { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(20,40,25,0.88); opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+    .bus-popup.show { opacity: 1; pointer-events: all; }
+    .bus-popup-card { background: var(--verde-oscuro); border-radius: 24px; padding: 2rem 1.5rem 1.75rem; max-width: 320px; width: 90%; text-align: center; transform: translateY(30px) scale(0.95); transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1); border: 1px solid rgba(168,197,176,0.3); }
+    .bus-popup.show .bus-popup-card { transform: translateY(0) scale(1); }
+    .bus-popup-eyebrow { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--verde-medio); margin-bottom: 0.75rem; }
+    .bus-popup-title { font-family: 'Playfair Display', serif; font-size: 22px; color: #fff; line-height: 1.3; margin-bottom: 1.5rem; }
+    .bus-popup-title em { font-style: italic; color: var(--verde-medio); }
+    .bus-scene { width: 100%; height: 90px; position: relative; overflow: hidden; margin-bottom: 1.25rem; }
+    .road { position: absolute; bottom: 0; left: 0; right: 0; height: 28px; background: #1a2e1f; border-radius: 4px; }
+    .road-line { position: absolute; bottom: 11px; height: 6px; width: 28px; background: rgba(255,255,255,0.15); border-radius: 3px; animation: roadlines 0.8s linear infinite; }
+    @keyframes roadlines { 0%{left:110%} 100%{left:-15%} }
+    .bus-svg { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); animation: busrocking 0.4s ease-in-out infinite alternate; }
+    @keyframes busrocking { from{transform:translateX(-50%) rotate(-0.8deg)} to{transform:translateX(-50%) rotate(0.8deg)} }
+    .tree { position: absolute; animation: treemove 1.2s linear infinite; font-size: 20px; bottom: 26px; }
+    .tree:nth-child(2) { animation-delay: -0.6s; font-size: 16px; }
+    @keyframes treemove { 0%{right:-10%} 100%{right:110%} }
+    .confetti { position: absolute; top: 0; width: 6px; height: 6px; border-radius: 50%; animation: confettiFall 1.5s ease-in infinite; }
+    @keyframes confettiFall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(80px) rotate(360deg);opacity:0} }
+    .bus-popup-btn { width: 100%; padding: 12px; border-radius: 12px; background: var(--verde); border: none; color: #fff; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+    /* PORTADA */
+    .portada-hero { position: relative; height: 50vw; min-height: 200px; max-height: 320px; overflow: hidden; }
+    .portada-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+    .portada-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(20,40,25,0.9) 100%); }
+    .portada-hero-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1.5rem; text-align: center; }
+    .portada-eyebrow { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--verde-medio); margin-bottom: 0.3rem; }
+    .portada-title { font-family: 'Playfair Display', serif; font-size: 38px; color: #fff; line-height: 1; }
+    .portada-title em { font-style: italic; color: var(--verde-medio); }
+    .portada-date { font-size: 11px; color: rgba(255,255,255,0.65); letter-spacing: 2px; margin-top: 0.3rem; }
+    .portada-body { padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
+
+    /* BUS TRACKER */
+    .bus-tracker { background: var(--verde-oscuro); border-radius: 18px; padding: 1.1rem 1.25rem; color: #fff; }
+    .bt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; }
+    .bt-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde-medio); }
+    .bt-status { font-size: 11px; color: #fff; background: rgba(168,197,176,0.2); padding: 3px 10px; border-radius: 20px; }
+    .bt-status.active { background: rgba(74,124,89,0.6); }
+    .bt-route { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+    .bt-stop { text-align: center; flex-shrink: 0; }
+    .bt-stop-name { font-size: 11px; color: var(--verde-medio); margin-bottom: 2px; }
+    .bt-stop-time { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; }
+    .bt-track { flex: 1; position: relative; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+    .bt-track-fill { height: 100%; background: var(--verde); border-radius: 2px; transition: width 1s linear; }
+    .bt-bus-icon { position: absolute; top: -8px; transform: translateX(-50%); font-size: 18px; transition: left 1s linear; }
+    .bt-eta { text-align: center; margin-top: 0.25rem; }
+    .bt-eta-num { font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; line-height: 1; }
+    .bt-eta-label { font-size: 11px; color: var(--verde-medio); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+    .bt-arrived { text-align: center; padding: 0.5rem 0; }
+    .bt-arrived-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #fff; }
+    .bt-arrived-sub { font-size: 12px; color: var(--verde-medio); margin-top: 4px; }
+
+    /* NIGHT SCHEDULE */
+    .night-card { background: var(--blanco); border-radius: 16px; border: 0.5px solid #d4e4d8; overflow: hidden; }
+    .night-header { padding: 0.85rem 1.1rem; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid #eef4f0; }
+    .night-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); font-weight: 500; }
+    .night-item { display: flex; gap: 10px; align-items: center; padding: 9px 1.1rem; border-bottom: 0.5px solid #f0f5f1; transition: background 0.2s; }
+    .night-item:last-child { border-bottom: none; }
+    .night-item.current { background: var(--verde-claro); }
+    .night-time { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--verde); min-width: 48px; flex-shrink: 0; }
+    .night-event { font-size: 13px; color: var(--texto); flex: 1; }
+    .night-item.current .night-event { font-weight: 500; color: var(--verde-oscuro); }
+    .night-now { font-size: 10px; background: var(--verde); color: #fff; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+    .night-link { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--verde); text-decoration: none; margin-top: 2px; }
+
+    /* BOTÓN MENÚ */
+    .menu-tease-btn { width: 100%; display: flex; align-items: center; gap: 12px; background: var(--verde-oscuro); border: none; border-radius: 16px; padding: 1rem 1.25rem; cursor: pointer; text-align: left; transition: opacity 0.15s; }
+    .menu-tease-btn:active { opacity: 0.85; }
+    .menu-tease-icon { font-size: 28px; flex-shrink: 0; }
+    .menu-tease-text { flex: 1; }
+    .menu-tease-title { font-family: 'Playfair Display', serif; font-size: 16px; color: #fff; margin-bottom: 2px; }
+    .menu-tease-sub { font-size: 12px; color: var(--verde-medio); }
+    .menu-tease-arrow { font-size: 20px; color: var(--verde-medio); flex-shrink: 0; }
+
+    /* POPUP ANSIOSO */
+    .ansioso-overlay { position: fixed; inset: 0; background: rgba(20,40,25,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .ansioso-overlay.show { opacity: 1; pointer-events: all; }
+    .ansioso-card { background: var(--verde-oscuro); border-radius: 24px; padding: 2.5rem 1.75rem; max-width: 300px; width: 88%; text-align: center; border: 1px solid rgba(168,197,176,0.25); transform: scale(0.9); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    .ansioso-overlay.show .ansioso-card { transform: scale(1); }
+    .ansioso-emoji { font-size: 52px; margin-bottom: 1rem; display: block; animation: shake 0.5s ease-in-out 0.4s; }
+    @keyframes shake { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg)} 40%{transform:rotate(8deg)} 60%{transform:rotate(-6deg)} 80%{transform:rotate(6deg)} }
+    .ansioso-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #fff; line-height: 1.2; margin-bottom: 0.75rem; }
+    .ansioso-text { font-size: 14px; color: var(--verde-medio); line-height: 1.6; margin-bottom: 1.5rem; }
+    .ansioso-btn { width: 100%; padding: 13px; border-radius: 12px; background: var(--verde); border: none; color: #fff; font-size: 15px; font-family: 'Playfair Display', serif; font-style: italic; cursor: pointer; }
+    .msg-card { background: var(--blanco); border-radius: 16px; border: 0.5px solid #d4e4d8; overflow: hidden; }
+    .msg-header { padding: 0.85rem 1.1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid #eef4f0; }
+    .msg-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); font-weight: 500; }
+    .msg-count { font-size: 11px; color: #7a9a82; }
+    .msg-form { padding: 0.9rem 1.1rem; border-bottom: 0.5px solid #eef4f0; display: flex; flex-direction: column; gap: 8px; }
+    .msg-name-input { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid #d4e4d8; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--crema); outline: none; }
+    .msg-name-input:focus { border-color: var(--verde); background: #fff; }
+    .msg-textarea { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid #d4e4d8; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--texto); background: var(--crema); outline: none; resize: none; min-height: 64px; }
+    .msg-textarea:focus { border-color: var(--verde); background: #fff; }
+    .msg-send { width: 100%; padding: 10px; border-radius: 10px; background: var(--verde); border: none; color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+    .msg-list { padding: 0.5rem 1.1rem 0.9rem; display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .msg-empty { text-align: center; padding: 1rem; font-size: 13px; color: #a0b5a5; }
+    .msg-bubble { background: var(--verde-claro); border-radius: 12px; padding: 0.7rem 0.9rem; }
+    .msg-bubble-name { font-size: 11px; font-weight: 500; color: var(--verde); margin-bottom: 3px; }
+    .msg-bubble-text { font-size: 13px; color: var(--texto); line-height: 1.5; }
+    .msg-bubble-time { font-size: 10px; color: #7a9a82; margin-top: 4px; text-align: right; }
+
+    /* SCREEN HEADERS */
+    .screen-header { background: var(--verde-oscuro); padding: 2rem 1.25rem 1.75rem; text-align: center; position: relative; overflow: hidden; }
+    .screen-header::after { content: ''; position: absolute; bottom: -20px; left: 0; right: 0; height: 40px; background: var(--crema); border-radius: 50%; }
+    .screen-eyebrow { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--verde-medio); margin-bottom: 0.5rem; }
+    .screen-title { font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; line-height: 1.1; }
+    .screen-title em { font-style: italic; color: var(--verde-medio); }
+    .screen-body { padding: 2rem 1rem 1rem; }
+
+    /* TIMELINE */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(to bottom, var(--verde), var(--verde-medio), transparent); }
+    .tl-item { position: relative; margin-bottom: 2rem; }
+    .tl-dot { position: absolute; left: -2rem; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--verde); border: 2px solid var(--crema); box-shadow: 0 0 0 2px var(--verde); display: flex; align-items: center; justify-content: center; }
+    .tl-dot-inner { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+    .tl-dot.gold { background: var(--oro); box-shadow: 0 0 0 2px var(--oro); }
+    .tl-year { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 0.4rem; font-weight: 500; }
+    .tl-card { background: var(--blanco); border-radius: 14px; border: 0.5px solid #d4e4d8; overflow: hidden; }
+    .tl-card.gold-card { border-color: var(--oro); }
+    .tl-img { width: 100%; height: 160px; object-fit: cover; object-position: center center; }    
+    .tl-content { padding: 0.9rem 1rem; }
+    .tl-content.gold-bg { background: linear-gradient(135deg, #fdf8f0, #f0e8d0); }
+    .tl-heading { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--texto); margin-bottom: 0.4rem; line-height: 1.2; }
+    .tl-text { font-size: 13px; color: #5a7562; line-height: 1.6; }
+    .tl-quote { margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-left: 2px solid var(--verde-medio); font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; color: var(--verde); background: var(--verde-claro); border-radius: 0 8px 8px 0; }
+    .tl-quote.gold { border-color: var(--oro); color: #8a6020; background: var(--oro-claro); }
+
+    /* VUESTRA HISTORIA */
+    .vuestros-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 1.5rem 1rem 0; }
+    .vuestros-tabs::-webkit-scrollbar { display: none; }
+    .vuestros-tab { padding: 8px 16px; border-radius: 20px; border: 1px solid #d4e4d8; background: var(--blanco); font-size: 12px; color: #7a9a82; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
+    .vuestros-tab.active { background: var(--verde); border-color: var(--verde); color: #fff; }
+    .vuestros-content { padding: 1rem; }
+    .vuestros-panel { display: none; }
+    .vuestros-panel.active { display: block; }
+    .momento-card { background: var(--blanco); border-radius: 16px; border: 0.5px solid #d4e4d8; overflow: hidden; margin-bottom: 1.25rem; }
+    .momento-card.featured { border-color: var(--oro); }
+    .momento-img { width: 100%; height: 200px; object-fit: cover; }
+    .momento-body { padding: 1rem 1.1rem; }
+    .momento-date { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 0.4rem; font-weight: 500; }
+    .momento-date.gold { color: var(--oro); }
+    .momento-caption { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--texto); margin-bottom: 0.6rem; line-height: 1.2; }
+    .momento-text { font-size: 13px; color: #5a7562; line-height: 1.7; }
+    .momento-quote { margin-top: 0.9rem; padding: 0.7rem 0.9rem; border-left: 2px solid var(--verde-medio); font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; color: var(--verde); background: var(--verde-claro); border-radius: 0 10px 10px 0; }
+    .momento-quote.gold { border-color: var(--oro); color: #8a6020; background: var(--oro-claro); }
+    .momento-tag { display: inline-block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; background: var(--verde-claro); color: var(--verde); padding: 3px 10px; border-radius: 20px; margin-bottom: 0.6rem; }
+    .momento-tag.gold { background: var(--oro-claro); color: #8a6020; }
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 1rem 0; }
+    .stat-box { background: var(--verde-claro); border-radius: 12px; padding: 0.75rem 0.5rem; text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--verde); line-height: 1; }
+    .stat-label { font-size: 10px; color: #7a9a82; margin-top: 3px; letter-spacing: 0.5px; }
+
+    /* ORÁCULO */
+    .finder-input-wrap { position: relative; margin-bottom: 0.75rem; }
+    .finder-input { width: 100%; padding: 12px 14px 12px 40px; border-radius: 12px; border: 1px solid #d4e4d8; background: var(--blanco); font-size: 14px; color: var(--texto); font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; }
+    .finder-input:focus { border-color: var(--verde); }
+    .finder-input-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+    .finder-results { display: flex; flex-direction: column; gap: 8px; }
+    .finder-empty { text-align: center; padding: 2rem 1rem; font-size: 14px; color: #7a9a82; }
+    .finder-card { background: var(--blanco); border-radius: 14px; border: 1px solid #d4e4d8; overflow: hidden; }
+    .finder-card-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; }
+    .finder-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--verde-claro); border: 1.5px solid var(--verde-medio); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--verde); flex-shrink: 0; }
+    .finder-name { font-size: 14px; font-weight: 500; flex: 1; }
+    .finder-tag { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--verde); background: var(--verde-claro); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .finder-card-body { padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.3s ease; background: #fafcfa; font-size: 13px; color: #4a6355; line-height: 1.7; }
+    .finder-card-body.open { max-height: 400px; padding: 10px 14px 14px; }
+    .finder-pred-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--verde-medio); margin-bottom: 6px; }
+
+    /* TRIVIAL */
+    .quiz-progress { display: flex; gap: 4px; margin-bottom: 1.25rem; }
+    .quiz-dot { height: 4px; flex: 1; border-radius: 2px; background: #d4e4d8; transition: background 0.3s; }
+    .quiz-dot.done { background: var(--verde); }
+    .quiz-dot.current { background: var(--verde-medio); }
+    .quiz-card { background: var(--blanco); border-radius: 16px; border: 0.5px solid #d4e4d8; padding: 1.25rem; }
+    .quiz-counter { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #7a9a82; margin-bottom: 0.75rem; }
+    .quiz-question { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--texto); margin-bottom: 1.1rem; line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option { padding: 11px 14px; border-radius: 10px; border: 1px solid #d4e4d8; background: var(--crema); font-size: 14px; color: var(--texto); cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+    .quiz-option:hover { border-color: var(--verde-medio); background: var(--verde-claro); }
+    .quiz-option.correct { background: var(--verde-claro); border-color: var(--verde); color: var(--verde); font-weight: 500; }
+    .quiz-option.wrong { background: #fdecea; border-color: #e57373; color: #b71c1c; }
+    .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+    .quiz-feedback { margin-top: 0.75rem; font-size: 13px; font-weight: 500; color: var(--verde); min-height: 20px; }
+    .quiz-feedback.wrong { color: #c0392b; }
+    .quiz-next { margin-top: 1rem; width: 100%; padding: 12px; border-radius: 10px; background: var(--verde); color: #fff; font-size: 14px; font-family: 'DM Sans', sans-serif; border: none; cursor: pointer; display: none; }
+    .quiz-result { text-align: center; padding: 2rem 1rem; background: var(--blanco); border-radius: 16px; border: 0.5px solid #d4e4d8; display: none; }
+    .quiz-score-big { font-family: 'Playfair Display', serif; font-size: 64px; color: var(--verde); line-height: 1; }
+    .quiz-score-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #7a9a82; margin-top: 4px; }
+    .quiz-score-msg { font-size: 15px; color: var(--texto); margin-top: 1rem; line-height: 1.5; }
+    .quiz-restart { margin-top: 1.25rem; padding: 10px 24px; border-radius: 10px; border: 1px solid var(--verde); background: transparent; color: var(--verde); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="screens">
+
+    <!-- S1: INICIO -->
+    <div class="screen active" id="s-inicio">
+      <div class="portada-hero">
+        <img src="foto.jpeg" onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80'" alt="Mante y Moni">
+        <div class="portada-hero-overlay"></div>
+        <div class="portada-hero-text">
+          <div class="portada-eyebrow">bienvenido al autobús</div>
+          <div class="portada-title">Mante <em>&</em> Moni</div>
+          <div class="portada-date">13 · junio · 2026 · Destino: la mejor día de nuestras vidas</div>
+        </div>
+      </div>
+      <div class="portada-body">
+
+        <!-- BUS TRACKER -->
+        <div class="bus-tracker">
+          <div class="bt-header">
+            <span class="bt-title">🚌 Trayecto en curso</span>
+            <span class="bt-status" id="bt-status">En camino</span>
+          </div>
+          <div class="bt-route">
+            <div class="bt-stop">
+              <div class="bt-stop-name">Salida</div>
+              <div class="bt-stop-time">19:25</div>
+            </div>
+            <div class="bt-track">
+              <div class="bt-track-fill" id="bt-fill" style="width:0%"></div>
+              <div class="bt-bus-icon" id="bt-bus" style="left:0%">🚌</div>
+            </div>
+            <div class="bt-stop">
+              <div class="bt-stop-name">Llegada</div>
+              <div class="bt-stop-time">20:00</div>
+            </div>
+          </div>
+          <div class="bt-eta" id="bt-eta-wrap">
+            <div class="bt-eta-num" id="bt-eta-num">—</div>
+            <div class="bt-eta-label">minutos para llegar</div>
+          </div>
+          <div class="bt-arrived" id="bt-arrived" style="display:none">
+            <div class="bt-arrived-text">¡Hemos llegado! 🎉</div>
+            <div class="bt-arrived-sub">Bienvenidos a la Finca El Pendolero</div>
+          </div>
+        </div>
+
+        <!-- HORARIO DE LA NOCHE -->
+        <div class="night-card">
+          <div class="night-header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="night-title">Lo que queda de celebración</span>
+          </div>
+          <div class="night-item" data-from="1925" data-to="2000">
+            <div class="night-time">19:25</div>
+            <div class="night-event">🚌 Salida de los autobuses</div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+          <div class="night-item" data-from="2000" data-to="2200">
+            <div class="night-time">20:00</div>
+            <div style="flex:1">
+              <div class="night-event">🥂 Bienvenida &amp; cóctel</div>
+              <a class="night-link" href="https://maps.app.goo.gl/oskpL5GstJXyeB919" target="_blank"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Finca El Pendolero</a>
+            </div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+          <div class="night-item" data-from="2200" data-to="2330">
+            <div class="night-time">22:00</div>
+            <div class="night-event">🍽️ Cena</div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+          <div class="night-item" data-from="2330" data-to="2400">
+            <div class="night-time">23:30</div>
+            <div class="night-event">🎶 ¡Empieza la fiesta!</div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+          <div class="night-item" data-from="230" data-to="300">
+            <div class="night-time">02:30</div>
+            <div class="night-event">🚌 Primer autobús vuelta</div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+          <div class="night-item" data-from="500" data-to="600">
+            <div class="night-time">05:00</div>
+            <div class="night-event">🌅 Último autobús · Hasta siempre</div>
+            <span class="night-now" style="display:none">Ahora</span>
+          </div>
+        </div>
+
+        <!-- BOTÓN MENÚ -->
+        <button class="menu-tease-btn" onclick="openMenuPopup()">
+          <span class="menu-tease-icon">🍽️</span>
+          <div class="menu-tease-text">
+            <div class="menu-tease-title">¿Curiosidad por el menú?</div>
+            <div class="menu-tease-sub">Pulsa para descubrirlo</div>
+          </div>
+          <span class="menu-tease-arrow">→</span>
+        </button>
+
+        <!-- MENSAJES A LOS NOVIOS -->
+        <div class="msg-card">
+          <div class="msg-header">
+            <span class="msg-title">💌 Dejanos tu mensaje </span>
+            <span class="msg-count" id="msg-count">0 mensajes</span>
+          </div>
+          <div class="msg-form">
+            <input class="msg-name-input" id="msg-name" type="text" placeholder="Tu nombre" maxlength="30">
+            <textarea class="msg-textarea" id="msg-text" placeholder="Escríbenos algo bonito para que lo lean después de la boda…" maxlength="200"></textarea>
+            <button class="msg-send" onclick="sendMsg()">Enviar mensaje 💚</button>
+          </div>
+          <div class="msg-list" id="msg-list">
+            <div class="msg-empty" id="msg-empty">No seas tímido y sé el primero en escribirles 🌿</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- S2: NUESTRA HISTORIA -->
+    <div class="screen" id="s-historia">
+      <div class="screen-header">
+        <div class="screen-eyebrow">nuestra historia</div>
+        <div class="screen-title">Las segundas partes<br><em>pueden ser mejores</em></div>
+      </div>
+      <div class="screen-body">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+            <div class="tl-year">Verano 2016</div>
+            <div class="tl-card">
+              <img class="tl-img" src="foto-monimant1.jpg.png" alt="" style="object-position: center 70% !important;">
+              <div class="tl-content">
+                <div class="tl-heading">Viaje de fin de curso a Mallorca</div>
+                <div class="tl-text">Segundo día de playa, Mante va a saludar a sus ex-compañeros de Los Robles. Ahí estaba Moni y Bea se encargó de que se conocieran. El resto es historia.</div>
+                <div class="tl-quote">"Si Mante la conquistó con unos pantalones amarillos mientras bailaba Cotton Eye Joe, ese amor era para toda la vida."</div>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+            <div class="tl-year">2016 – 2019</div>
+            <div class="tl-card">
+              <img class="tl-img" src="foto-monimant2.jpg.png" alt="">
+              <div class="tl-content">
+                <div class="tl-heading">El primer capítulo</div>
+                <div class="tl-text">Dos años de risas, biblioteca, renfe, viajes improvisados y conversaciones en bancos de la Avenida de Europa que se alargaban hasta las tantas. La vida los juntó con fuerza y, como pasa a veces, también los separó.</div>
+                <div class="tl-quote">"Disfrutamos muchisimo, nos reímos más, pero no estábamos preparados."</div>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+            <div class="tl-year">2019 – 2022</div>
+            <div class="tl-card">
+              <img class="tl-img" src="foto-monimant3.jpg.png" alt="">
+              <div class="tl-content">
+                <div class="tl-heading">El paréntesis</div>
+                <div class="tl-text">Cada uno siguió su camino. Sin saberlo, los dos se estaban preparando para lo que vendría.</div>
+                <div class="tl-quote">"No siempre se tiene el privilegio de coger distancia para acercate más aún."</div>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+            <div class="tl-year">Enero 2022</div>
+            <div class="tl-card">
+              <img class="tl-img" src="foto-monimant4.jpg.png" alt="">
+              <div class="tl-content">
+                <div class="tl-heading">El segundo round 🔔</div>
+                <div class="tl-text">Un mensaje, una quedada y mucho miedo. Ya no había vuelta atrás, ya no había más oportunidades, ya sólo estaban Mante y Moni.</div>
+                <div class="tl-quote">"No tardamos ni dos días en darnos cuenta que llevábamos meses deseando estar así."</div>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot gold"><div class="tl-dot-inner"></div></div>
+            <div class="tl-year">Mayo 2024</div>
+            <div class="tl-card gold-card">
+              <img class="tl-img" src="foto.jpeg" alt="">
+              <div class="tl-content gold-bg">
+                <div class="tl-heading">La pregunta ✨</div>
+                <div class="tl-text">En medio del lago di Braies, Mante se arrodilló jugándose el tipo. Moni, tras minutos de incredulidad y lágrimas, dijo sí. El resto... remar para que no nos cobrasen.</div>
+                <div class="tl-quote gold">"Ya no había vuelta atrás, habíamos activado la cuenta hasta el día de hoy"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3: VUESTRA HISTORIA -->
+    <div class="screen" id="s-vuestra">
+      <div class="screen-header">
+        <div class="screen-eyebrow">✦ vuestra historia ✦</div>
+        <div class="screen-title">Los recuerdos<br><em>que nos unen</em></div>
+      </div>
+      <div class="vuestros-tabs">
+        <button class="vuestros-tab active" onclick="switchVuestros('fjimenez', this)">Familia Jiménez</button>
+        <button class="vuestros-tab" onclick="switchVuestros('fsanchez', this)">Familia Sánchez</button>
+        <button class="vuestros-tab" onclick="switchVuestros('fmanterola', this)">Familia Manterola</button>
+        <button class="vuestros-tab" onclick="switchVuestros('fzarate', this)">Familia Zárate</button>
+        <button class="vuestros-tab" onclick="switchVuestros('escolapios', this)">Escolapios</button>
+        <button class="vuestros-tab" onclick="switchVuestros('losrobles', this)">Los Robles</button>
+        <button class="vuestros-tab" onclick="switchVuestros('nfq', this)">Nfq</button>
+        <button class="vuestros-tab" onclick="switchVuestros('mdl', this)">Martins de Lima</button>
+        <button class="vuestros-tab" onclick="switchVuestros('hdd', this)">Herrera del Duque</button>
+        <button class="vuestros-tab" onclick="switchVuestros('pola', this)">Pola de Allande</button>
+        <button class="vuestros-tab" onclick="switchVuestros('universidad', this)">Universidad</button>
+        <button class="vuestros-tab" onclick="switchVuestros('australia', this)">Australia</button>
+        <button class="vuestros-tab" onclick="switchVuestros('amigofamilia', this)">Amigos Familia</button>
+      </div>
+      <div class="vuestros-content">
+
+        <!-- FAMILIA JIMÉNEZ -->
+        <div class="vuestros-panel active" id="panel-fjimenez">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1511895426328-dc8714191011?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">La familia de Moni</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">De donde viene todo lo bueno de Moni</div>
+              <div class="momento-text">Hay familias que te dan un apellido y familias que te dan un carácter. Los Jiménez son de las segundas. De ahí viene la energía de Moni, su forma de reírse, esa capacidad de hacer que cualquier sitio se sienta como casa. Hoy Mante entra en esa familia. Y la familia, que sabe lo que tiene, lo recibe con los brazos abiertos.</div>
+              <div class="momento-quote gold">"La familia no se elige. Y sin embargo, es el mejor regalo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Navidades</div>
+              <div class="momento-date">Cada diciembre</div>
+              <div class="momento-caption">Las mesas que no tienen hora de fin</div>
+              <div class="momento-text">En esta familia las sobremesas no terminan nunca antes de las doce. El café se enfría, las velas se consumen, y nadie se levanta. Porque cuando estáis todos juntos, el tiempo se detiene. Eso no se aprende, eso se hereda. Y Moni lo heredó.</div>
+              <div class="momento-quote">"La mejor parte siempre fue cuando ya no quedaban más platos pero nadie quería irse."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Hoy</div>
+              <div class="momento-date">13 junio 2026</div>
+              <div class="momento-caption">El día que la familia crece</div>
+              <div class="momento-text">Mante no llega solo a esta familia. Trae consigo todo lo que es, todo lo que ha vivido y todo lo que está por vivir. Y esta familia, que sabe recibir, lo recibe como uno más. Hoy la mesa se hace más grande. Y eso siempre es motivo de celebración.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAMILIA SÁNCHEZ -->
+        <div class="vuestros-panel" id="panel-fsanchez">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">La otra mitad de Moni</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">El apellido que completa la historia</div>
+              <div class="momento-text">Detrás de cada persona hay dos familias que la construyeron. Los Sánchez pusieron su parte en hacer de Moni la persona que hoy se casa. Esa mezcla de carácter y ternura, de firmeza y generosidad, viene de aquí también. Hoy toda esa historia se celebra en una finca en Torrelodones.</div>
+              <div class="momento-quote gold">"Dos apellidos, una sola historia. Y hoy, una sola celebración."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1484981138541-3d074aa97716?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">La familia</div>
+              <div class="momento-date">Cada reunión</div>
+              <div class="momento-caption">Donde el tiempo siempre pasa demasiado rápido</div>
+              <div class="momento-text">Hay reuniones familiares que son un trámite. Las de esta familia no. Cuando os juntáis hay algo que pasa en el ambiente — una energía que hace que todo el mundo quiera quedarse un poco más. Moni creció en eso. Y se nota.</div>
+              <div class="momento-quote">"El tiempo con la familia nunca es suficiente. Y hoy hay tiempo de sobra."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAMILIA MANTEROLA -->
+        <div class="vuestros-panel" id="panel-fmanterola">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">La familia de Mante</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">De donde viene el carácter de Mante</div>
+              <div class="momento-text">Los Manterola son los que pusieron los cimientos. El sentido del humor, la lealtad, esa forma de entrar en una habitación y hacer que todo el mundo se sienta cómodo — todo eso viene de aquí. Hoy Moni entra en esa historia. Y la historia, que es buena, se hace aún mejor.</div>
+              <div class="momento-quote gold">"Una familia que ríe junta, lo aguanta todo junta."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Los domingos</div>
+              <div class="momento-date">Cualquier domingo</div>
+              <div class="momento-caption">Donde todo se habla y nadie se va con hambre</div>
+              <div class="momento-text">En esta familia los domingos tienen su propio ritual. Las comidas que empiezan a las dos y acaban cuando alguien se da cuenta de que ya es de noche. En el medio cabe todo: las noticias del barrio, los planes del verano, alguna discusión que no va a ningún lado y muchas risas. Mante creció en esas mesas. Y se nota.</div>
+              <div class="momento-quote">"Nunca saldrás con hambre de esta casa. Ni de ganas de volver."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAMILIA ZÁRATE -->
+        <div class="vuestros-panel" id="panel-fzarate">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1511895426328-dc8714191011?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">La otra mitad de Mante</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">El apellido que completa a Mante</div>
+              <div class="momento-text">Dos apellidos construyen a una persona. Los Zárate aportaron lo suyo: esa combinación de carácter y generosidad que define a Mante en los momentos que importan. La forma en que trata a la gente, la forma en que se compromete con lo que quiere — parte de todo eso viene de esta familia. Y hoy se celebra.</div>
+              <div class="momento-quote gold">"Detrás de cada persona grande hay una familia que lo hizo posible."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Hoy</div>
+              <div class="momento-date">13 junio 2026</div>
+              <div class="momento-caption">Cuatro apellidos, una celebración</div>
+              <div class="momento-text">Jiménez, Sánchez, Manterola, Zárate. Cuatro familias que hoy se sientan en la misma mesa para celebrar que dos de los suyos decidieron construir algo juntos. Pocas veces la vida junta tanta buena gente en el mismo sitio. Disfrutadlo.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESCOLAPIOS -->
+        <div class="vuestros-panel" id="panel-escolapios">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El origen</div>
+              <div class="momento-date gold">Septiembre 2007</div>
+              <div class="momento-caption">Escuelas Pías de San Fernando</div>
+              <div class="momento-text">Primero de la ESO. Pasillos nuevos, caras nuevas y esa mezcla de miedo y emoción que solo existe el primer día de cole. Entre mochilas demasiado grandes y horarios que nadie entendía todavía, se formó algo que ninguno de vosotros buscaba pero que todos necesitabais: el grupo. Han pasado casi 20 años desde ese septiembre. Y aquí seguís. En un autobús rumbo a la boda de uno de los vuestros. Si eso no es amistad, no existe ninguna palabra para describirlo.</div>
+              <div class="momento-quote gold">"Nos conocimos sin elegir. Nos quedamos eligiendo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <div class="momento-body" style="padding-top:1.25rem">
+              <div class="momento-tag">Los números</div>
+              <div class="momento-date">2007 – 2026</div>
+              <div class="momento-caption">Casi dos décadas en datos</div>
+              <div class="stat-row">
+                <div class="stat-box"><div class="stat-num">19</div><div class="stat-label">años juntos</div></div>
+                <div class="stat-box"><div class="stat-num">∞</div><div class="stat-label">noches épicas</div></div>
+                <div class="stat-box"><div class="stat-num">1</div><div class="stat-label">boda hoy</div></div>
+              </div>
+              <div class="momento-text">Primero de la ESO era 2007. Han pasado institutos, selectividades, primeros trabajos, rupturas, reencuentros, cambios de ciudad y alguna que otra crisis existencial compartida. Y el grupo sigue en el WhatsApp. Con los mismos, más o menos, enviando memes a las 2am.</div>
+            </div>
+          </div>
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El viaje</div>
+              <div class="momento-date">Aquella vez</div>
+              <div class="momento-caption">El que nadie planeó bien pero salió perfecto</div>
+              <div class="momento-text">Todo buen grupo tiene ese viaje. El que se organizó en un chat tres días antes, con un apartamento que no era lo que se veía en la foto. Y sin embargo fue el mejor. Porque los viajes no dependen del destino. Dependen de quién va contigo.</div>
+              <div class="momento-quote gold">"Organizamos fatal. Pero lo pasamos increíble. Siempre."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOS ROBLES -->
+        <div class="vuestros-panel" id="panel-losrobles">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">Los de Moni</div>
+              <div class="momento-date gold">Desde siempre</div>
+              <div class="momento-caption">El grupo que la conoce de verdad</div>
+              <div class="momento-text">Antes de que Mante existiera en la vida de Moni, ya existíais vosotros. Los que la vieron crecer, los que estuvieron en sus peores y mejores momentos, los que saben exactamente cómo es cuando nadie la mira. Eso es un privilegio que muy poca gente tiene. Y hoy lo celebráis con ella en uno de los días más importantes de su vida. Curiosidad: fue precisamente en un viaje vuestro donde Mante y Moni se conocieron. Sin Los Robles, no habría boda.</div>
+              <div class="momento-quote gold">"Los amigos de verdad no necesitan verla cada semana para seguir siendo los de siempre."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1543269664-7eef42226a21?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">El grupo</div>
+              <div class="momento-date">Todos esos años</div>
+              <div class="momento-caption">Los que hacen que Moni sea Moni</div>
+              <div class="momento-text">Moni tiene una energía especial. Esa capacidad de hacer que cualquier plan sea mejor de lo esperado, esa risa que se contagia sin permiso. Eso no viene de la nada — viene de haber crecido rodeada de vosotros. Gracias por habérselo enseñado.</div>
+              <div class="momento-quote">"El grupo que te forma es el grupo que te define."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NFQ -->
+        <div class="vuestros-panel" id="panel-nfq">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El trabajo de Mante</div>
+              <div class="momento-date gold">Cada día</div>
+              <div class="momento-caption">Los que aguantan a Mante de lunes a viernes</div>
+              <div class="momento-text">Hay un mérito especial en querer a alguien después de haberle visto en modo trabajo. Las reuniones antes de las 9, los deadlines de última hora, el Slack a cualquier hora. Vosotros habéis pasado por todo eso con Mante y aquí seguís. Eso dice mucho de él. Y todavía más de vosotros. Hoy os toca verlo en su mejor versión: fuera de la oficina y a punto de casarse.</div>
+              <div class="momento-quote gold">"Lo que pase esta noche no va al grupo de trabajo. Pacto de honor."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1530099486328-e021101a494a?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Fuera de la oficina</div>
+              <div class="momento-date">Las cenas de equipo</div>
+              <div class="momento-caption">Cuando el equipo se convierte en algo más</div>
+              <div class="momento-text">Esta noche no hay Slack, no hay tareas pendientes, no hay reuniones mañana. Solo música, cena y el Mante que no sale en las calls. Disfrutadlo. Os lo habéis ganado.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MARTINS DE LIMA -->
+        <div class="vuestros-panel" id="panel-mdl">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">Martins de Lima</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">Un grupo que trasciende fronteras</div>
+              <div class="momento-text">Hay grupos que se forman en un sitio y se quedan ahí. Los Martins de Lima no son de esos. La distancia no ha podido con lo que os une — y eso, en los tiempos que corren, es extraordinario. Hoy estáis aquí, que es donde tenéis que estar.</div>
+              <div class="momento-quote gold">"Lo bueno de verdad no necesita estar cerca para seguir siendo bueno."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1543269664-7eef42226a21?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Los reencuentros</div>
+              <div class="momento-date">Cada vez que coincidís</div>
+              <div class="momento-caption">Como si el tiempo no hubiese pasado</div>
+              <div class="momento-text">Con algunos grupos hay que ponerse al día. Con vosotros no. Cada vez que coincidís es como si el tiempo no hubiese pasado — mismo humor, misma energía, misma sensación de que esto es exactamente donde tienes que estar. Esta noche va a ser de esas.</div>
+              <div class="momento-quote">"No importa cuánto tiempo pase. Siempre volvemos a lo mismo."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERRERA DEL DUQUE -->
+        <div class="vuestros-panel" id="panel-hdd">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El pueblo de Mante</div>
+              <div class="momento-date gold">Cada verano</div>
+              <div class="momento-caption">Donde todo empieza y todo termina</div>
+              <div class="momento-text">Hay sitios que no son solo sitios. Son una forma de sentir. Herrera del Duque es eso para Mante: el olor a tierra seca en verano, las noches que duran más de lo que deberían, las caras de siempre en los sitios de siempre. Es de donde viene y a donde vuelve. Y es parte de lo que es. Hoy ese mundo está aquí.</div>
+              <div class="momento-quote gold">"El pueblo no te olvida. Y tú no olvidas el pueblo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Los veranos</div>
+              <div class="momento-date">Cada agosto</div>
+              <div class="momento-caption">Las noches que no tienen hora de fin</div>
+              <div class="momento-text">Las noches de verano en el pueblo tienen una magia que no existe en ninguna ciudad. Sin prisa, sin planes fijos. Solo la gente, la noche y ese tiempo que parece que no pasa. Mante creció en esas noches. Y algo de esa magia se quedó en él para siempre.</div>
+              <div class="momento-quote">"Las mejores noches de mi vida huelen a verano en el pueblo."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POLA DE ALLANDE -->
+        <div class="vuestros-panel" id="panel-pola">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El pueblo de Moni</div>
+              <div class="momento-date gold">Raíces</div>
+              <div class="momento-caption">De donde viene la energía de Moni</div>
+              <div class="momento-text">Pola de Allande es verde, tranquilo y de esos sitios que te marcan sin que te des cuenta. Moni lleva ese sitio dentro: esa forma de ir a su ritmo sin que nada la apresure, esa conexión con lo que importa de verdad. Todo eso viene de aquí. De vosotros. Del pueblo que la vio crecer.</div>
+              <div class="momento-quote gold">"Las raíces no se ven. Pero sostienen todo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Siempre</div>
+              <div class="momento-date">De pequeña y de mayor</div>
+              <div class="momento-caption">El sitio al que siempre se vuelve</div>
+              <div class="momento-text">Hay sitios a los que vuelves y el tiempo no ha pasado. Las mismas caras, los mismos lugares, la misma sensación de que aquí todo va bien. Pola de Allande es eso para Moni. Y hoy ese trozo de su vida está aquí, celebrando con ella el día más importante.</div>
+              <div class="momento-quote">"A Pola siempre se vuelve. Y siempre sienta bien."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UNIVERSIDAD -->
+        <div class="vuestros-panel" id="panel-universidad">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">La universidad</div>
+              <div class="momento-date gold">Aquellos años</div>
+              <div class="momento-caption">Cuando todo era posible y nada estaba decidido</div>
+              <div class="momento-text">La universidad tiene algo que no se repite: la sensación de que el mundo entero está por descubrir y de que tienes toda la vida para hacerlo. En ese momento de libertad y caos se forjaron estas amistades. Puede que los caminos se hayan separado un poco desde entonces. Pero hoy están todos en el mismo autobús. Y eso lo dice todo.</div>
+              <div class="momento-quote gold">"La uni te da una carrera. Si tienes suerte, también te da a estas personas."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Los años locos</div>
+              <div class="momento-date">Primeros de todo</div>
+              <div class="momento-caption">Primeros pisos, primeras borracheras, primeros lunes con resaca</div>
+              <div class="momento-text">Hubo un primer piso compartido donde nadie sabía cocinar. Hubo noches que empezaron con "solo una cerveza" y terminaron al amanecer. Hubo exámenes estudiados en las últimas horas y aprobados de milagro. Todo eso lo vivisteis juntos. Y de eso están hechas las amistades que duran.</div>
+              <div class="momento-quote">"De aquellos años locos, estos amigos para siempre."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUSTRALIA -->
+        <div class="vuestros-panel" id="panel-australia">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">Los del otro lado del mundo</div>
+              <div class="momento-date gold">Aquella aventura</div>
+              <div class="momento-caption">Cuando la distancia lo hace todo más especial</div>
+              <div class="momento-text">Hay personas que conoces en casa y personas que conoces cuando estás lejos de casa. Las segundas tienen algo especial: os encontrasteis sin red de seguridad, sin el contexto de siempre, siendo simplemente vosotros mismos. Eso crea un vínculo diferente. Y el hecho de que ese vínculo haya sobrevivido a la vuelta y a los kilómetros dice todo lo que hay que decir.</div>
+              <div class="momento-quote gold">"Algunos de los mejores amigos los encuentras cuando más lejos estás de casa."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">La aventura</div>
+              <div class="momento-date">Al otro lado del mundo</div>
+              <div class="momento-caption">Lo que pasa cuando te lanzas sin red</div>
+              <div class="momento-text">Australia no es un destino cualquiera. Es una decisión. La de dejar lo conocido, cruzar el planeta y ver qué pasa. En esa aventura aparecisteis vosotros. Y lo que empezó allí cruzó de vuelta con los que regresaron. Hoy estáis aquí. Y eso, viniendo de tan lejos, tiene mucho valor.</div>
+              <div class="momento-quote">"De Australia a una finca en Torrelodones. Qué giro de guion."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AMIGOS FAMILIA -->
+        <div class="vuestros-panel" id="panel-amigofamilia">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1511895426328-dc8714191011?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El principio de todo</div>
+              <div class="momento-date gold">Siempre</div>
+              <div class="momento-caption">La familia que lo hace posible</div>
+              <div class="momento-text">Hay personas que no eligen estar en tu vida — simplemente están. Desde el primer día, desde antes incluso de que tú lo recuerdes. Vosotros sois eso: el punto de partida de todo lo que Mante es y de todo lo que Moni ha encontrado al entrar en esta familia. Hoy no es solo la boda de dos personas. Es la celebración de todo lo que habéis construido juntos durante décadas.</div>
+              <div class="momento-quote gold">"La familia no se elige. Y sin embargo, es el mejor regalo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Navidades</div>
+              <div class="momento-date">Cada diciembre</div>
+              <div class="momento-caption">Las mesas que duran hasta las tantas</div>
+              <div class="momento-text">Hay algo en esta familia que hace que ninguna sobremesa termine nunca antes de las doce. El café se enfría, las velas se consumen, y nadie se levanta. Porque cuando estáis todos juntos, el tiempo se detiene. Eso no se aprende, eso se hereda.</div>
+              <div class="momento-quote">"La mejor parte de las fiestas siempre fue cuando ya no quedaban más platos pero nadie quería irse."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Hoy</div>
+              <div class="momento-date">13 junio 2026</div>
+              <div class="momento-caption">El día que la familia crece</div>
+              <div class="momento-text">Moni no llega sola a esta familia. Trae consigo todo lo que es, todo lo que ha vivido y todo lo que está por vivir. Y esta familia, que sabe recibir, la recibe con los brazos abiertos. Hoy la mesa se hace más grande. Y eso siempre es motivo de celebración.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AMIGOS -->
+        <div class="vuestros-panel" id="panel-escolapios">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El origen</div>
+              <div class="momento-date gold">Septiembre 2007</div>
+              <div class="momento-caption">Escuelas Pías de San Fernando</div>
+              <div class="momento-text">Primero de la ESO. Pasillos nuevos, caras nuevas y esa mezcla de miedo y emoción que solo existe el primer día de cole. Entre mochilas demasiado grandes y horarios que nadie entendía todavía, se formó algo que ninguno de vosotros buscaba pero que todos necesitabais: el grupo. Han pasado casi 20 años desde ese septiembre. Y aquí seguís. En un autobús rumbo a la boda de uno de los vuestros. Si eso no es amistad, no existe ninguna palabra para describirlo.</div>
+              <div class="momento-quote gold">"Nos conocimos sin elegir. Nos quedamos eligiendo."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <div class="momento-body" style="padding-top:1.25rem">
+              <div class="momento-tag">Los números</div>
+              <div class="momento-date">2007 – 2026</div>
+              <div class="momento-caption">Casi dos décadas en datos</div>
+              <div class="stat-row">
+                <div class="stat-box"><div class="stat-num">19</div><div class="stat-label">años juntos</div></div>
+                <div class="stat-box"><div class="stat-num">∞</div><div class="stat-label">noches épicas</div></div>
+                <div class="stat-box"><div class="stat-num">1</div><div class="stat-label">boda hoy</div></div>
+              </div>
+              <div class="momento-text">Primero de la ESO era 2007. Han pasado institutos, selectividades, primeros trabajos, rupturas, reencuentros, cambios de ciudad y alguna que otra crisis existencial compartida. Y el grupo sigue en el WhatsApp. Con los mismos, más o menos, enviando memes a las 2am.</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Las noches</div>
+              <div class="momento-date">Todos esos viernes</div>
+              <div class="momento-caption">Las que ya no recordáis pero nunca olvidaréis</div>
+              <div class="momento-text">Hay noches que no se pueden contar. No porque pasen cosas terribles, sino porque lo que las hace especiales es imposible de traducir a palabras. La sensación de estar exactamente donde tienes que estar, con exactamente las personas que tienes que estar. Vosotros tenéis unas cuantas de esas. Y esta noche va a ser otra.</div>
+              <div class="momento-quote">"Las mejores historias siempre empiezan con 'y al final quedamos cuatro'."</div>
+            </div>
+          </div>
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El viaje</div>
+              <div class="momento-date">Aquella vez</div>
+              <div class="momento-caption">El viaje que nadie planeó bien pero salió perfecto</div>
+              <div class="momento-text">Todo buen grupo de amigos tiene ese viaje. El que se organizó en un chat de WhatsApp tres días antes, con un apartamento que no era exactamente lo que se veía en la foto y un coche con más personas de las que debería llevar. Y sin embargo fue el mejor viaje. Porque los viajes no dependen del destino. Dependen de quién va contigo.</div>
+              <div class="momento-quote gold">"Organizamos fatal. Pero lo pasamos increíble. Siempre."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AMIGOS FAMILIA -->
+        <div class="vuestros-panel" id="panel-amigofamilia">
+          <div class="momento-card featured">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag gold">El grupo especial</div>
+              <div class="momento-date">Siempre</div>
+              <div class="momento-caption">Ni familia ni amigos. Las dos cosas a la vez.</div>
+              <div class="momento-text">Hay un tipo de relación que no tiene nombre oficial pero que todo el mundo reconoce cuando la tiene. No son familia de sangre, pero tienen el peso de la familia. No son amigos de toda la vida, pero tienen la confianza de los que sí lo son. Vosotros sois ese grupo imposible de categorizar y absolutamente imprescindible. Los que están en los momentos que importan. Como hoy.</div>
+              <div class="momento-quote gold">"Algunos lazos no necesitan apellido para ser de los más fuertes."</div>
+            </div>
+          </div>
+          <div class="momento-card">
+            <img class="momento-img" src="https://images.unsplash.com/photo-1543269664-7eef42226a21?w=600&q=80" alt="">
+            <div class="momento-body">
+              <div class="momento-tag">Los veranos</div>
+              <div class="momento-date">Cada agosto</div>
+              <div class="momento-caption">Las piscinas, las cenas largas y los planes que nunca se repiten igual</div>
+              <div class="momento-text">Hay grupos que solo funcionan en verano. El vuestro funciona todo el año, pero en verano alcanza su versión definitiva. Las tardes que se convierten en noches sin que nadie lo decida, los planes que cambian sobre la marcha y siempre salen mejor así. Eso es lo que tenéis. Y es mucho.</div>
+              <div class="momento-quote">"Lo mejor del verano siempre sois vosotros."</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- S4: ORÁCULO -->
+    <div class="screen" id="s-oraculo">
+      <div class="screen-header">
+        <div class="screen-eyebrow">✦ el oráculo ✦</div>
+        <div class="screen-title">Búscate y<br><em>descubre tu verdad</em></div>
+      </div>
+      <div class="screen-body">
+        <div class="finder-input-wrap">
+          <svg class="finder-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a8c5b0" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="finder-input" id="finder-input" type="text" placeholder="Escribe tu nombre…" oninput="filterGuests()" autocomplete="off">
+        </div>
+        <div class="finder-results" id="finder-results"><div class="finder-empty">🔮 El oráculo te espera…</div></div>
+      </div>
+    </div>
+
+    <!-- S5: TRIVIAL -->
+    <div class="screen" id="s-trivial">
+      <div class="screen-header">
+        <div class="screen-eyebrow">🎯 trivial</div>
+        <div class="screen-title">¿Cuánto sabes de<br><em>Mante & Moni?</em></div>
+      </div>
+      <div class="screen-body">
+        <div class="quiz-progress" id="quiz-progress"></div>
+        <div class="quiz-card" id="quiz-main">
+          <div class="quiz-counter" id="quiz-counter"></div>
+          <div class="quiz-question" id="quiz-question"></div>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <button class="quiz-next" id="quiz-next" onclick="nextQuestion()">Siguiente →</button>
+        </div>
+        <div class="quiz-result" id="quiz-result">
+          <div class="quiz-score-big" id="quiz-score"></div>
+          <div class="quiz-score-label">respuestas correctas</div>
+          <div class="quiz-score-msg" id="quiz-msg"></div>
+          <button class="quiz-restart" onclick="restartQuiz()">Volver a jugar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav>
+    <button class="nav-btn active" onclick="goTo('inicio',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="nav-label">Inicio</span><div class="nav-dot"></div></button>
+    <button class="nav-btn" onclick="goTo('historia',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="nav-label">Nosotros</span><div class="nav-dot"></div></button>
+    <button class="nav-btn" onclick="goTo('vuestra',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-label">Vosotros</span><div class="nav-dot"></div></button>
+    <button class="nav-btn" onclick="goTo('oraculo',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg><span class="nav-label">El oráculo</span><div class="nav-dot"></div></button>
+    <button class="nav-btn" onclick="goTo('trivial',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="nav-label">Trivial</span><div class="nav-dot"></div></button>
+  </nav>
+</div>
+
+<!-- POPUP ANSIOSO -->
+<div class="ansioso-overlay" id="ansioso-overlay" onclick="closeMenuPopup(event)">
+  <div class="ansioso-card">
+    <span class="ansioso-emoji">😤</span>
+    <div class="ansioso-title">¡No seas ansioso!</div>
+    <div class="ansioso-text">Estás a minutos de comprobarlo. El menú te espera en la finca — y merece la pena. Paciencia, que todo llega.</div>
+    <button class="ansioso-btn" onclick="closeMenuPopup()">Perdón</button>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div class="bus-popup" id="bus-popup">
+  <div class="bus-popup-card">
+    <div class="bus-popup-eyebrow">¡ya casi estamos!</div>
+    <div class="bus-popup-title">Los novios están<br><em>llegando a la finca</em> 🎉</div>
+    <div class="bus-scene">
+      <span class="tree">🌲</span><span class="tree">🌳</span>
+      <div class="road">
+        <div class="road-line" style="left:20%"></div>
+        <div class="road-line" style="left:50%;animation-delay:-0.27s"></div>
+        <div class="road-line" style="left:80%;animation-delay:-0.54s"></div>
+      </div>
+      <div class="bus-svg">
+        <svg width="90" height="46" viewBox="0 0 90 46" fill="none">
+          <rect x="2" y="4" width="76" height="34" rx="6" fill="#4a7c59"/>
+          <rect x="6" y="8" width="14" height="12" rx="2" fill="#c8e6d0" opacity="0.9"/>
+          <rect x="24" y="8" width="14" height="12" rx="2" fill="#c8e6d0" opacity="0.9"/>
+          <rect x="42" y="8" width="14" height="12" rx="2" fill="#c8e6d0" opacity="0.9"/>
+          <rect x="60" y="8" width="14" height="12" rx="2" fill="#c8e6d0" opacity="0.9"/>
+          <rect x="2" y="26" width="76" height="6" rx="2" fill="#3a6347"/>
+          <circle cx="18" cy="39" r="7" fill="#2a3d2f" stroke="#a8c5b0" stroke-width="2"/>
+          <circle cx="18" cy="39" r="3" fill="#a8c5b0"/>
+          <circle cx="62" cy="39" r="7" fill="#2a3d2f" stroke="#a8c5b0" stroke-width="2"/>
+          <circle cx="62" cy="39" r="3" fill="#a8c5b0"/>
+          <rect x="78" y="12" width="10" height="6" rx="2" fill="#f7c948"/>
+          <circle cx="31" cy="12" r="3" fill="#f5c5a3"/>
+          <rect x="28" y="15" width="6" height="5" rx="1" fill="#2a3d2f"/>
+          <circle cx="50" cy="12" r="3" fill="#f5c5a3"/>
+          <rect x="47" y="15" width="6" height="5" rx="1" fill="#fff" opacity="0.9"/>
+          <text x="46" y="13" font-size="5" fill="#c0a060">♥</text>
+        </svg>
+      </div>
+      <div class="confetti" style="left:10%;background:#f7c948;animation-delay:0s"></div>
+      <div class="confetti" style="left:30%;background:#a8c5b0;animation-delay:0.3s"></div>
+      <div class="confetti" style="left:55%;background:#f5c5a3;animation-delay:0.6s"></div>
+      <div class="confetti" style="left:75%;background:#4a7c59;animation-delay:0.9s"></div>
+      <div class="confetti" style="left:90%;background:#f7c948;animation-delay:0.15s"></div>
+    </div>
+    <button class="bus-popup-btn" onclick="closePopup()">¡Vamos a celebrar! 🥂</button>
+  </div>
+</div>
+
+<script>
+// POPUP ANSIOSO
+function openMenuPopup() {
+  document.getElementById('ansioso-overlay').classList.add('show');
+}
+function closeMenuPopup(e) {
+  if (!e || e.target === document.getElementById('ansioso-overlay') || !e.target) {
+    document.getElementById('ansioso-overlay').classList.remove('show');
+  }
+}
+
+// POPUP BUS
+setTimeout(() => document.getElementById('bus-popup').classList.add('show'), 600);
+function closePopup() {
+  document.getElementById('bus-popup').classList.remove('show');
+  setTimeout(() => document.getElementById('bus-popup').style.display='none', 400);
+}
+
+// NAV
+function goTo(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('s-'+id).scrollTop = 0;
+}
+
+// BUS TRACKER (19:20 → 19:45, duración 25min)
+function updateBusTracker() {
+  const now = new Date();
+  const start = new Date(now); start.setHours(19,25,0,0);
+  const end = new Date(now); end.setHours(20,0,0,0);
+  const total = end - start;
+  const elapsed = now - start;
+  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+  const minsLeft = Math.max(0, Math.ceil((end - now) / 60000));
+
+  document.getElementById('bt-fill').style.width = pct + '%';
+  document.getElementById('bt-bus').style.left = Math.min(96, pct) + '%';
+
+  if (now < start) {
+    // Antes de salir
+    document.getElementById('bt-status').textContent = 'Preparando salida';
+    document.getElementById('bt-status').classList.remove('active');
+    document.getElementById('bt-eta-num').textContent = '—';
+    document.getElementById('bt-eta-wrap').querySelector('.bt-eta-label').textContent = 'El autobús sale a las 19:25';
+  } else if (now >= end) {
+    // Llegamos
+    document.getElementById('bt-status').textContent = '¡Llegamos!';
+    document.getElementById('bt-status').classList.add('active');
+    document.getElementById('bt-eta-wrap').style.display = 'none';
+    document.getElementById('bt-arrived').style.display = 'block';
+  } else {
+    // En camino
+    document.getElementById('bt-status').textContent = 'En camino';
+    document.getElementById('bt-status').classList.add('active');
+    document.getElementById('bt-eta-num').textContent = minsLeft;
+    document.getElementById('bt-eta-wrap').querySelector('.bt-eta-label').textContent = minsLeft === 1 ? 'minuto para llegar' : 'minutos para llegar';
+  }
+}
+updateBusTracker();
+setInterval(updateBusTracker, 30000);
+
+// NIGHT SCHEDULE — resalta el evento actual
+function updateNightSchedule() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const cur = h * 100 + m;
+
+  document.querySelectorAll('.night-item').forEach(item => {
+    let from = parseInt(item.dataset.from);
+    let to = parseInt(item.dataset.to);
+    // Tratar horas de madrugada (< 700 = día siguiente)
+    const fromAdj = from < 700 ? from + 2400 : from;
+    const toAdj = to < 700 ? to + 2400 : to === 0 ? 2400 : to;
+    const curAdj = cur < 700 ? cur + 2400 : cur;
+    const isCurrent = curAdj >= fromAdj && curAdj < toAdj;
+    item.classList.toggle('current', isCurrent);
+    item.querySelector('.night-now').style.display = isCurrent ? 'inline-block' : 'none';
+  });
+}
+updateNightSchedule();
+setInterval(updateNightSchedule, 60000);
+
+// MENSAJES — Google Sheets
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx_dkocdFWwEcD9cxRq3fuy2SqjvcwJSTHKZ_fIfvAKcXGi5i-3BwlZb56oZpJK1-dr/exec';
+
+function renderMessages(msgs) {
+  const list = document.getElementById('msg-list');
+  const count = document.getElementById('msg-count');
+  count.textContent = msgs.length + (msgs.length === 1 ? ' mensaje' : ' mensajes');
+  if (!msgs.length) {
+    list.innerHTML = '<div class="msg-empty">Sé el primero en escribirles 🌿</div>';
+    return;
+  }
+  list.innerHTML = msgs.map(m => `
+    <div class="msg-bubble">
+      <div class="msg-bubble-name">${m.nombre || m.name || ''}</div>
+      <div class="msg-bubble-text">${m.mensaje || m.text || ''}</div>
+      <div class="msg-bubble-time">${m.hora || m.time || ''}</div>
+    </div>
+  `).join('');
+}
+
+function fetchMessages() {
+  fetch(SHEET_URL)
+    .then(r => r.json())
+    .then(data => renderMessages(data.reverse()))
+    .catch(() => {
+      document.getElementById('msg-list').innerHTML = '<div class="msg-empty">No se pudieron cargar los mensajes 🌿</div>';
+    });
+}
+
+function sendMsg() {
+  const name = document.getElementById('msg-name').value.trim();
+  const text = document.getElementById('msg-text').value.trim();
+  if (!name) { document.getElementById('msg-name').focus(); return; }
+  if (!text) { document.getElementById('msg-text').focus(); return; }
+  const now = new Date();
+  const hora = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  const btn = document.querySelector('.msg-send');
+  btn.textContent = 'Enviando…';
+  btn.disabled = true;
+
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre: name, mensaje: text, hora })
+  }).then(() => {
+    document.getElementById('msg-name').value = '';
+    document.getElementById('msg-text').value = '';
+    btn.textContent = '¡Enviado! 💚';
+    setTimeout(() => {
+      btn.textContent = 'Enviar mensaje 💚';
+      btn.disabled = false;
+      fetchMessages();
+    }, 1500);
+  }).catch(() => {
+    btn.textContent = 'Error al enviar';
+    btn.disabled = false;
+  });
+}
+
+fetchMessages();
+setInterval(fetchMessages, 30000);
+
+// VUESTRA HISTORIA TABS
+function switchVuestros(id, btn) {
+  document.querySelectorAll('.vuestros-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.vuestros-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ORÁCULO
+const guests = [
+  {name:"Mama",group:"Familia",p:"Hoy no eres la madre, eres la protagonista. Llevarás los pañuelos más bonitos del evento y los usarás todos. Llegarás a casa con el corazón lleno y los pies destrozados. Misión cumplida. 💐"},
+  {name:"Papa",group:"Familia",p:"Empezarás la noche diciendo que te vas pronto. Acabarás siendo el último de la familia en irse. Darás un discurso improvisado que nadie pidió pero todos agradecerán. 🥃"},
+  {name:"Ignacio",group:"Familia",p:"Hoy tienes cara de que lo tienes todo bajo control. Spoiler: no lo tienes. Aparecerás en la pista haciendo algo que nadie esperaba. El orgullo familiar hecho persona. 💪"},
+  {name:"Sara",group:"Familia",p:"Serás la que tenga el bolso con todo lo que alguien pueda necesitar: tiritas, chicles, aguja e hilo. La heroína silenciosa. Y aun así bailarás más que nadie. 👜"},
+  {name:"Jaime",group:"Familia",p:"Llegas con energía de sobra. Esta noche harás al menos dos brindis y en uno se te irá un poco la mano. Todos te lo perdonarán. 🥂"},
+  {name:"Angela",group:"Familia",p:"Eres de las que lloran en la ceremonia y luego lo niegan. Pero todos te verán. Y todos te querrán más por ello. 🌸"},
+  {name:"Madrina",group:"Familia",p:"Hoy brillas con luz propia. Cuando acabe, alguien te dirá que eras la más guapa. Y tendrán razón. ✨"},
+  {name:"Tito Jose",group:"Familia",p:"Empezarás contando anécdotas y acabarás siendo el centro de la mesa. Alguien pedirá que cuentes 'aquella historia' y no podrás negarte. 🎙️"},
+  {name:"Paloma",group:"Familia",p:"Elegante, serena y el ancla de calma en medio del caos festivo. Cuando nadie te mire, te soltarás en la pista. 🕊️"},
+  {name:"Luis",group:"Familia",p:"Llegas tranquilo. Pero en cuanto empiece la música te transformas. Esta noche no será diferente. 🎶"},
+  {name:"Almudena",group:"Familia",p:"Tienes ojo para los detalles. Esta noche lo comentarás todo y acertarás en todo. 🌺"},
+  {name:"Paula",group:"Familia",p:"La noche empieza con tus mejores modales y acaba con tus mejores pasos de baile. Ese es tu arco narrativo y es perfecto. 📸"},
+  {name:"Tia Maribel",group:"Familia",p:"Llegas con clase, te quedas con estilo. Serás la que le diga a todo el mundo lo guapos que están y lo dirás de verdad. 💫"},
+  {name:"Tio Ramón",group:"Familia",p:"Hoy tienes permiso para soltar todos los chistes guardados. La mesa se reirá, la familia pondrá los ojos en blanco cariñosamente. 😄"},
+  {name:"Primo Ignacio",group:"Familia",p:"Energía de primo mayor: un poco de responsabilidad, mucho de fiesta. Y en la pista, el que más aguante. 🔋"},
+  {name:"Eva Ignacio",group:"Familia",p:"Esta noche te lo pasarás en grande y harás que los de alrededor también. 🌿"},
+  {name:"Prima Carolina",group:"Familia",p:"Habrá un momento en que tú y alguien más os miréis y sepáis exactamente lo que el otro piensa sin decir nada. Complicidad familiar. 💚"},
+  {name:"Paco",group:"Familia",p:"Llegas con esa calma y una copa en mano antes de que nadie se dé cuenta. Un clásico. 🍷"},
+  {name:"Primo Ramón",group:"Familia",p:"El autobús de las 5 te conoce bien. 🚌"},
+  {name:"Tía Belen",group:"Familia",p:"Llegas impecable y así te quedas toda la noche. Serás la confidente de más de una persona. 🤫"},
+  {name:"Prima Ángela",group:"Familia",p:"Tienes ese punto de alegría contagiosa. Esta noche quedarás estupenda en todas las fotos. 📷"},
+  {name:"Emilio",group:"Familia",p:"En diez minutos ya conoces a personas que no conocías. Esta noche harás amigos nuevos sin darte cuenta. 🤝"},
+  {name:"Prima Belén",group:"Familia",p:"Emoción en la ceremonia, conversación en el cóctel, risa en la cena y pista en la fiesta. Cuatro actos perfectos. 🎭"},
+  {name:"Jorge Belén",group:"Familia",p:"Esta noche alguien te dirá que eres muy majo. Porque lo eres. 👍"},
+  {name:"Prima Isabel",group:"Familia",p:"Elegante, divertida y con criterio propio. Nadie te impedirá bailar. 💃"},
+  {name:"Tomás Isabel",group:"Familia",p:"Vienes a pasarlo bien y eso se nota. Tu mesa estará de suerte. 🎁"},
+  {name:"Pablo",group:"Familia",p:"Tranquilo por fuera, pura fiesta por dentro. Habrá un momento en que sorprendas a todos. 🎯"},
+  {name:"Arancha",group:"Familia",p:"Sabes exactamente qué quieres de una noche así. Sabiduría pura. 🌙"},
+  {name:"Javier",group:"Familia",p:"Hoy tienes cara de estar contento de verdad y eso se contagia. ☀️"},
+  {name:"Obdulia",group:"Familia",p:"Serás memorable sin proponértelo. Que es la única forma de serlo de verdad. 💫"},
+  {name:"Tomás",group:"Familia",p:"Llegas puntual, disfrutas cada plato. Eres el tipo de invitado que los novios agradecen. 🍽️"},
+  {name:"Manuel",group:"Familia",p:"Sereno, amable y con sentido del humor en el momento justo. 🎩"},
+  {name:"Carlos",group:"Familia",p:"Esta noche habrá al menos un momento épico protagonizado por ti. 💥"},
+  {name:"Irene",group:"Familia",p:"Serás la que abrace a la persona que lo necesite sin que nadie se lo pida. 🤗"},
+  {name:"Leire",group:"Familia",p:"Esta noche tendrás una de esas conversaciones que recuerdas mucho tiempo después. 💬"},
+  {name:"Ason",group:"Familia",p:"Nombre único para una persona única. Esta noche dejarás huella sin proponértelo. 🌟"},
+  {name:"Jose Manuel",group:"Familia",p:"Llegas como el que sabe lo que viene. Clase. 🎶"},
+  {name:"Blanca",group:"Familia",p:"Esta noche estarás en tu mejor versión sin siquiera intentarlo. ✨"},
+  {name:"Alex Esteban",group:"Amigos",p:"19 años siendo el que propone el plan y el último en arrepentirse. Esta noche igual. Leyenda en construcción desde las Escuelas Pías. 🏗️"},
+  {name:"Bego",group:"Amigos",p:"Casi dos décadas después del primer día de cole y sigues siendo la energía del grupo. Habrá un momento en la pista que quedará en el imaginario colectivo. 💥"},
+  {name:"Arto",group:"Amigos",p:"Nombre corto, personalidad grande. Desde primero de la ESO proponiendo el plan B cuando el A se complica. El plan B siempre es mejor. 🎲"},
+  {name:"Zuriñe",group:"Amigos",p:"Original irrepetible desde 2007. Esta noche alguien te preguntará de dónde es tu outfit y no podrán replicarlo. 👗"},
+  {name:"Bea",group:"Amigos",p:"Celestina de honor. Sin ti esta historia no existiría y esta boda no existiría. Hoy deberías llevar una banda que lo diga. Pero con tu sonrisa basta. 💘"},
+  {name:"Rubén",group:"Amigos",p:"A las 2am estarás en plena forma cuando otros ya van de bajada. Resistencia nivel élite. Siempre fue así. 🔋"},
+  {name:"Brejas",group:"Amigos",p:"Solo el nombre ya es una promesa de buena noche. Desde las Escuelas Pías, siempre en el centro de lo que pasa. Sin buscarlo, claro. 🎯"},
+  {name:"Ferxo Cardona",group:"Amigos",p:"Apellido incluido en la lista porque eso ya dice algo de ti. Esta noche el mejor comentario de la mesa será tuyo. Guárdalo para el momento justo. 🎤"},
+  {name:"Lego",group:"Amigos",p:"Encajas en cualquier sitio. Lo mismo estás con los padres de los novios que liderando el corro en la pista. Versátil desde 2007. 🧩"},
+  {name:"Astorga",group:"Amigos",p:"La memoria del grupo. Recordarás detalles de esta noche que todos los demás olvidarán. 📚"},
+  {name:"Alba",group:"Amigos",p:"Luz de alba en plena noche de fiesta. Estarás en todas las fotos buenas sin proponértelo. 📸"},
+  {name:"Dani",group:"Amigos",p:"El que está cuando alguien necesita apoyo y también el que más anima cuando toca. Ese equilibrio no lo tiene todo el mundo. ⚖️"},
+  {name:"Yayo",group:"Amigos",p:"Este nombre ya lleva fiesta incorporada desde los tiempos del instituto. Habrá un momento en la pista que se convertirá en anécdota. 🕺"},
+  {name:"Marta",group:"Amigos",p:"Organizada por fuera, salvaje por dentro. El lado B tomará el control en cuanto suene la primera canción que la ponga. 🎵"},
+  {name:"Elena",group:"Amigos",p:"Alguien que no te conocía se irá pensando que eres una de sus personas favoritas. Efecto Elena, desde siempre. 🌟"},
+  {name:"Moi",group:"Amigos",p:"Esta noche habrá una versión de ti que solo aparece en las mejores noches. Esta es una de ellas. 🚀"},
+  {name:"Juano",group:"Amigos",p:"El que propone el primer baile en grupo y el que más aguante cuando ya quedan pocos. MVP silencioso. 🏆"},
+  {name:"Guti",group:"Amigos",p:"Llegas con ese punto de misterio. Esta noche lo revelarás en el momento menos esperado. Y será perfecto. 🎭"},
+  {name:"Irene",group:"Amigos",p:"Dos Irenes en la lista, cero posibilidad de confundirte. Esta noche tendrás tu momento propio e inconfundible. 🔮"},
+  {name:"Giorgi",group:"Amigos",p:"Aportarás algo que nadie más podría aportar. Eso te hace imprescindible. Y lo sabes. 🌍"},
+  {name:"Yambo",group:"Amigos",p:"El oráculo lo ve claro: primer brindis antes del cóctel, mejor momento en la pista, vuelta al autobús con historia que contar. 🎪"},
+  {name:"Isa",group:"Amigos",p:"Esta noche estarás en tu mejor versión y harás que los de alrededor también. Superpoder nivel élite. 💫"},
+  {name:"Lolo",group:"Amigos",p:"Nombre que se dice dos veces porque una no basta. Esta noche necesitarás el doble de espacio para la energía que traes. 🎆"},
+  {name:"Ogki",group:"Amigos",p:"Nombre único en la sala, persona única. Nadie hará exactamente lo que tú harás esta noche. 🦋"},
+  {name:"Eli",group:"Amigos",p:"No necesitas alcohol para tener energía de sobra. Superpoder en el tramo final de la noche. ⚡"},
+  {name:"Prous",group:"Amigos",p:"Apellido en la lista. El mejor momento de la noche será tuyo. El oráculo lo garantiza. 🎯"},
+  {name:"Rodri",group:"Amigos",p:"Sin prisa pero sin pausa. En todas las conversaciones importantes y en ninguna de las aburridas. 🧭"},
+  {name:"Teresa",group:"Amigos",p:"Tendrás la mejor anécdota de tu mesa y la contarás mejor que nadie. Ya estás preparando el relato, ¿verdad? 📖"},
+  {name:"Tant",group:"Amigos",p:"Harás algo que no estaba en el guion de nadie pero que todos recordarán. Improvisación de alto nivel. 🎬"},
+  {name:"Pauli",group:"Amigos",p:"Tu mesa será la más animada y lo mejor es que ni te darás cuenta. Energía contagiosa. ☀️"},
+  {name:"Varo",group:"Amigos",p:"Irás de menos a más de una forma que dejará a todos con la boca abierta. El mejor final de noche lo tendrás tú. 🌙"},
+  {name:"Gabi",group:"Amigos",p:"Alguien que no te conocía bien se irá pensando que eres una de sus personas favoritas. Efecto Gabi activado. 💚"},
+  {name:"Xorx",group:"Amigos",p:"Disfrutar al máximo, bailar sin complejos, crear una anécdota memorable. Objetivos cumplidos antes de las 12. ✅"},
+  {name:"Paula",group:"Amigos",p:"Llegará tranquila, se soltará en el cóctel y para la fiesta ya no habrá quien la pare. 🌊"},
+  {name:"Edu",group:"Amigos",p:"Edu llega, Edu sonríe, Edu conquista. En ese orden y sin esfuerzo. 🗝️"},
+  {name:"Juanitop",group:"Amigos",p:"El 'top' no es casualidad. Esta noche estarás en tu mejor versión y ayudarás a que otros también. 🎪"},
+  {name:"Santi",group:"Amigos",p:"Habrá un momento que no esperabas. Será mejor que el que esperabas. 🎁"},
+  {name:"Luis",group:"Amigos",p:"El Luis amigo dará lo mejor de sí mismo esta noche. Y será mucho. 💪"},
+  {name:"Cristina",group:"Amigos",p:"Llegará serena y acabará siendo de las últimas en irse. La transformación de la noche. 🦋"},
+  {name:"Juan",group:"Amigos",p:"Presente, divertido y con el mejor timing para los brindis. 🥂"},
+  {name:"Blanca",group:"Amigos",p:"Una noche de diez te espera. Sin duda. ⭐"},
+  {name:"Irenilla",group:"Amigos",p:"La que escucha, la que ríe, la que baila. La que hace falta. 🌸"},
+  {name:"Patricia",group:"Amigos",p:"Tu instinto no te fallará esta noche. Ni una vez. 🎯"},
+  {name:"Josal",group:"Amigos",p:"Cóctel brillante, cena memorable, pista inevitable. Un arco narrativo de lujo. 📚"},
+  {name:"Juanan",group:"Amigos",p:"La noche es larga y tú eres de los que llegan al final. 🔋"},
+  {name:"Raquel",group:"Amigos",p:"Cuando todos estén un poco perdidos, tú seguirás siendo tú misma. Eso en una boda es un logro. 🌿"},
+  {name:"Andres",group:"Amigos",p:"Llegas sin hacer ruido y acabas siendo parte de los mejores momentos. Esa es tu magia. ✨"},
+  {name:"Alex",group:"Amigos",p:"Tiene algo preparado para la pista que nadie espera. El oráculo lo ve y no puede decir más. 🔮"},
+  {name:"Sebas",group:"Amigos",p:"Sebas llega, Sebas anima, Sebas se convierte en el alma de la mesa sin haberlo planeado. 🎖️"},
+  {name:"Palomo",group:"Amigos",p:"Habrá un momento Palomo que quedará en los anales del grupo. El oráculo lo garantiza. 🏛️"},
+  {name:"Isi",group:"Amigos",p:"Isi no falla. Nunca falla. Y hoy tampoco. 💃"},
+  {name:"Sergi",group:"Amigos",p:"Llegas con ese punto mediterráneo que hace que todo parezca más fácil. 🌊"},
+  {name:"Celu",group:"Amigos",p:"Tendrás el mejor momento de tu año cuando menos lo esperes. 🌟"},
+  {name:"Iñaki",group:"Trabajo",p:"Separarás el trabajo de la fiesta durante exactamente 45 minutos. Luego todo cambia. 🎉"},
+  {name:"Lu",group:"Trabajo",p:"Fuera de la oficina hay una versión de ti que muy poca gente conoce. Esta noche la conocerán. ⚡"},
+  {name:"Charlie",group:"Trabajo",p:"Profesionalidad más fiesta. Combinación ganadora. 🌍"},
+  {name:"Sara",group:"Trabajo",p:"Una noche en la que el trabajo quedará muy lejos. Bienvenida al lado bueno. ☀️"},
+  {name:"Marcos",group:"Trabajo",p:"Llegas como compañero y te quedas como amigo. La magia de las bodas. 🔄"},
+  {name:"Monica",group:"Trabajo",p:"Te irás pensando que deberías hacer esto más a menudo. Tendrás razón. 💼➡️🎊"},
+  {name:"Gregor",group:"Trabajo",p:"Habrá una versión de Gregor que la oficina no conoce. Para bien. Siempre para bien. 🦁"},
+  {name:"Emi",group:"Trabajo",p:"Emi llega, Emi sonríe, Emi se convierte en el alma del grupo sin haberlo planeado. 🎊"},
+  {name:"Martín",group:"Trabajo",p:"El equilibrio se romperá hacia el lado bueno. Bienvenido a la fiesta. 🎈"},
+  {name:"Gregor 1",group:"Trabajo",p:"Este Gregor tiene una noche diferente por delante. Diferente para bien. 🔮"},
+  {name:"Amir",group:"Trabajo",p:"Esta noche añadirás un capítulo nuevo. De los que se recuerdan. 📖"},
+  {name:"Alfonso",group:"Amigos Familia",p:"Serás el puente perfecto entre grupos que no se conocen. Un activo imprescindible. 🌉"},
+  {name:"Magdalena",group:"Amigos Familia",p:"Rodeada de gente que te quiere celebrando algo que lo merece. Disfrútalo. 🌺"},
+  {name:"Manuel",group:"Amigos Familia",p:"El que conoce a todo el mundo y a todos les cae bien. La persona más saludada de la velada. 🤝"},
+  {name:"Cristina",group:"Amigos Familia",p:"Confianza de amigos más cariño de familia. Hoy los dos se juntan. ✨"},
+  {name:"Rodrigo",group:"Amigos Familia",p:"No necesitas hacer nada especial para que se note que estás. Tu presencia completa la velada. 🌟"},
+  {name:"Fernando",group:"Amigos Familia",p:"Tendrás una conversación que recordarás mucho tiempo. De esas que solo pasan en bodas. 💬"},
+  {name:"Lourdes",group:"Amigos Familia",p:"Sabes exactamente qué quieres de una noche así. Y lo conseguirás todo. 🌸"},
+  {name:"Mari Carmen",group:"Amigos Familia",p:"Serás memorable sin proponértelo. Que es la única forma de serlo de verdad. 💫"},
+  {name:"Carlos Ortega",group:"Amigos Familia",p:"Esta noche Carlos Ortega tendrá un momento que solo puede ser de Carlos Ortega. Inconfundible. 🎯"},
+  {name:"Marisa",group:"Amigos Familia",p:"Elegancia y alegría combinadas. Una noche de diez. ⭐"},
+  {name:"Luis Romero",group:"Amigos Familia",p:"Luis Romero tendrá su momento estelar. El oráculo lo garantiza. 🔮"},
+  {name:"Belen Perez",group:"Amigos Familia",p:"Dejará huella siendo exactamente como es. Y eso es suficiente. 🌿"},
+  {name:"Tano Soler",group:"Amigos Familia",p:"Lo que pase en la pista quedará en la pista. 📚"},
+  {name:"Rafa",group:"Amigos Familia",p:"En el momento justo en el lugar justo. Instinto de campeón. 🏆"},
+  {name:"Marita",group:"Amigos Familia",p:"Un momento que será todo suyo. De los que hacen que te recuerden con cariño. 💝"},
+  {name:"Javier",group:"Amigos Familia",p:"Una noche especial en el mejor sentido. ✨"},
+  {name:"Mariola",group:"Amigos Familia",p:"Nombre con música y persona con ritmo. Cuando llegue la pista, todo el mundo entenderá. 🎵"},
+  {name:"Jose Ramón",group:"Amigos Familia",p:"El que recuerda el nombre de todo el mundo, pregunta cómo están de verdad y baila cuando toca. Un invitado diez. 💯"},
+  {name:"Marina",group:"Amigos Familia",p:"Al día siguiente le costará creer que fue real. Pero fue real. Y fue perfecta. 🌊"}
+];
+
+function normalize(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+function filterGuests() {
+  const q = normalize(document.getElementById('finder-input').value.trim());
+  const c = document.getElementById('finder-results');
+  if (q.length < 2) { c.innerHTML='<div class="finder-empty">🔮 El oráculo te espera…</div>'; return; }
+  const m = guests.filter(g => normalize(g.name).includes(q));
+  if (!m.length) { c.innerHTML='<div class="finder-empty">El oráculo no te encuentra… ¿seguro que viniste? 🤨</div>'; return; }
+  c.innerHTML='';
+  m.forEach(g => {
+    const init = g.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const card = document.createElement('div'); card.className='finder-card';
+    card.innerHTML=`<div class="finder-card-header" onclick="toggleCard(this)"><div class="finder-avatar">${init}</div><div class="finder-name">${g.name}</div><div class="finder-tag">${g.group}</div></div><div class="finder-card-body"><div class="finder-pred-label">✦ Tu predicción ✦</div>${g.p}</div>`;
+    c.appendChild(card);
+  });
+}
+function toggleCard(h) {
+  const b=h.nextElementSibling, open=b.classList.contains('open');
+  document.querySelectorAll('.finder-card-body.open').forEach(x=>x.classList.remove('open'));
+  if(!open) b.classList.add('open');
+}
+
+// TRIVIAL
+const questions=[
+  {q:"¿Cuál fue la discoteca dónde se conocieron?",options:["Titos","BCM","Pachá","Mawi Beach"],answer:1},
+  {q:"¿Quién hizo de celestina?",options:["Bea","Laus","Chuskis","Luiskarlos"],answer:0},
+  {q:"¿Cuántos países vamos a recorrer en nuestra luna de miel?",options:["1","2","3","4"],answer:1},
+  {q:"¿Quién está más nervioso ahora mismo?",options:["Mante","Moni","La madre de Mante","La madre de Moni"],answer:1},
+  {q:"¿De cuántos países han venido invitados a la boda?",options:["1","2","3","4"],answer:3}
+];
+let cur=0,qscore=0,answ=false;
+function buildProg(){const b=document.getElementById('quiz-progress');b.innerHTML='';questions.forEach((_,i)=>{const d=document.createElement('div');d.className='quiz-dot'+(i<cur?' done':i===cur?' current':'');b.appendChild(d);});}
+function showQ(){
+  answ=false; const q=questions[cur];
+  document.getElementById('quiz-counter').textContent='Pregunta '+(cur+1)+' de '+questions.length;
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('quiz-feedback').className='quiz-feedback';
+  document.getElementById('quiz-next').style.display='none';
+  buildProg();
+  const o=document.getElementById('quiz-options'); o.innerHTML='';
+  q.options.forEach((opt,i)=>{const b=document.createElement('button');b.className='quiz-option';b.textContent=opt;b.onclick=()=>selA(i);o.appendChild(b);});
+}
+function selA(i){
+  if(answ)return; answ=true;
+  const q=questions[cur], bs=document.querySelectorAll('.quiz-option');
+  bs.forEach(b=>b.classList.add('disabled'));
+  const fb=document.getElementById('quiz-feedback');
+  if(i===q.answer){bs[i].classList.add('correct');fb.textContent='¡Correcto! 🎉';fb.className='quiz-feedback';qscore++;}
+  else{bs[i].classList.add('wrong');bs[q.answer].classList.add('correct');bs[q.answer].classList.remove('disabled');fb.textContent='Era: '+q.options[q.answer];fb.className='quiz-feedback wrong';}
+  document.getElementById('quiz-next').style.display=cur<questions.length-1?'block':'none';
+  if(cur===questions.length-1)setTimeout(showResult,1200);
+}
+function nextQuestion(){cur++;showQ();}
+function showResult(){
+  document.getElementById('quiz-main').style.display='none';
+  document.getElementById('quiz-progress').style.display='none';
+  document.getElementById('quiz-result').style.display='block';
+  document.getElementById('quiz-score').textContent=qscore+'/'+questions.length;
+  const msgs=['Hay que repasar… 😅','¡No está mal! 👏','¡Casi perfecto! 🌟','¡Crack total! 🏆'];
+  document.getElementById('quiz-msg').textContent=msgs[qscore<=1?0:qscore<=3?1:qscore===4?2:3];
+}
+function restartQuiz(){
+  cur=0;qscore=0;
+  document.getElementById('quiz-main').style.display='block';
+  document.getElementById('quiz-progress').style.display='flex';
+  document.getElementById('quiz-result').style.display='none';
+  showQ();
+}
+showQ();
+</script>
+</body>
+</html>
