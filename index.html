@@ -159,6 +159,9 @@
     /* VUESTRA HISTORIA */
     .vuestros-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 1.5rem 1rem 0; }
     .vuestros-tabs::-webkit-scrollbar { display: none; }
+    .vuestros-tabs-wrap { position: relative; }
+    .vuestros-tabs-wrap::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 52px; background: linear-gradient(to right, transparent, var(--crema)); pointer-events: none; z-index: 2; }
+    .vuestros-tabs-wrap::before { content: '›'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--verde); z-index: 3; font-weight: bold; pointer-events: none; }
     .vuestros-tab { padding: 8px 16px; border-radius: 20px; border: 1px solid #d4e4d8; background: var(--blanco); font-size: 12px; color: #7a9a82; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
     .vuestros-tab.active { background: var(--verde); border-color: var(--verde); color: #fff; }
     .vuestros-content { padding: 1rem; }
@@ -415,7 +418,8 @@
         <div class="screen-eyebrow">✦ vuestra historia ✦</div>
         <div class="screen-title">Los recuerdos<br><em>que nos unen</em></div>
       </div>
-      <div class="vuestros-tabs">
+          <div class="vuestros-tabs-wrap">
+          <div class="vuestros-tabs">
         <button class="vuestros-tab active" onclick="switchVuestros('fzarate', this)">Familia Zárate</button>
         <button class="vuestros-tab" onclick="switchVuestros('fmanterola', this)">Familia Manterola</button>
         <button class="vuestros-tab" onclick="switchVuestros('fjimenez', this)">Familia Jiménez</button>
@@ -433,6 +437,7 @@
         <button class="vuestros-tab" onclick="switchVuestros('australia', this)">Australia</button>
         <button class="vuestros-tab" onclick="switchVuestros('amigofamilia', this)">Amigos Familia</button>
       </div>
+         </div>
       <div class="vuestros-content">
 
         <!-- FAMILIA ZÁRATE -->
